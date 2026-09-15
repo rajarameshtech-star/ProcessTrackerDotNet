@@ -34,6 +34,15 @@ builder.Services.AddScoped<ProcessTracker.API.Repositories.IProcessRecordReposit
 // Validators
 builder.Services.AddScoped<ProcessTracker.API.Validators.IDynamicProcessValidator, ProcessTracker.API.Validators.DynamicProcessValidator>();
 
+// Services
+builder.Services.AddScoped<ProcessTracker.API.Services.IProjectService, ProcessTracker.API.Services.ProjectService>();
+builder.Services.AddScoped<ProcessTracker.API.Services.IApplicationService, ProcessTracker.API.Services.ApplicationService>();
+builder.Services.AddScoped<ProcessTracker.API.Services.IProcessDefinitionService, ProcessTracker.API.Services.ProcessDefinitionService>();
+builder.Services.AddScoped<ProcessTracker.API.Services.IProcessFieldService, ProcessTracker.API.Services.ProcessFieldService>();
+builder.Services.AddScoped<ProcessTracker.API.Services.IProcessDefinitionProjectMappingService, ProcessTracker.API.Services.ProcessDefinitionProjectMappingService>();
+builder.Services.AddScoped<ProcessTracker.API.Services.IServiceItemService, ProcessTracker.API.Services.ServiceItemService>();
+builder.Services.AddScoped<ProcessTracker.API.Services.IProcessRecordService, ProcessTracker.API.Services.ProcessRecordService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -41,6 +50,11 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+
+    using var scope = app.Services.CreateScope();
+    var context = scope.ServiceProvider.GetRequiredService<ProcessTracker.API.Data.ProcessTrackerDbContext>();
+    var validator = scope.ServiceProvider.GetRequiredService<ProcessTracker.API.Validators.IDynamicProcessValidator>();
+    await ProcessTracker.API.Data.DbSeeder.SeedAsync(context, validator);
 }
 
 app.UseHttpsRedirection();
