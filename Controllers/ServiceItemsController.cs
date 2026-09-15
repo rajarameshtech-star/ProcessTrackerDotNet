@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ProcessTracker.API.DTOs;
 using ProcessTracker.API.Services;
@@ -16,14 +19,17 @@ public class ServiceItemsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAll([FromQuery] int? applicationId)
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<ServiceItemDto>))]
+    public async Task<ActionResult<IEnumerable<ServiceItemDto>>> GetAll([FromQuery] int? applicationId)
     {
         var items = await _service.GetAllAsync(applicationId);
         return Ok(items);
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(int id)
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ServiceItemDto))]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ServiceItemDto>> GetById(int id)
     {
         var item = await _service.GetByIdAsync(id);
         if (item == null) return NotFound();
@@ -31,7 +37,10 @@ public class ServiceItemsController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create(ServiceItemDto dto)
+    [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(ServiceItemDto))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<ActionResult<ServiceItemDto>> Create(ServiceItemDto dto)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
         try
@@ -50,7 +59,11 @@ public class ServiceItemsController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, ServiceItemDto dto)
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ServiceItemDto))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<ActionResult<ServiceItemDto>> Update(int id, ServiceItemDto dto)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
         if (id != dto.Id) return BadRequest();
@@ -71,7 +84,9 @@ public class ServiceItemsController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(int id)
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult> Delete(int id)
     {
         var result = await _service.DeleteAsync(id);
         if (!result) return NotFound();

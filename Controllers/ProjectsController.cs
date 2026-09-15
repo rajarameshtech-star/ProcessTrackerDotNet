@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ProcessTracker.API.DTOs;
 using ProcessTracker.API.Services;
@@ -16,14 +19,17 @@ public class ProjectsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAll()
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<ProjectDto>))]
+    public async Task<ActionResult<IEnumerable<ProjectDto>>> GetAll()
     {
         var projects = await _service.GetAllAsync();
         return Ok(projects);
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(int id, [FromQuery] bool includeDetails = false)
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ProjectDto))]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ProjectDto>> GetById(int id, [FromQuery] bool includeDetails = false)
     {
         var project = await _service.GetByIdAsync(id, includeDetails);
         if (project == null) return NotFound();
@@ -31,7 +37,9 @@ public class ProjectsController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create(ProjectDto dto)
+    [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(ProjectDto))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<ProjectDto>> Create(ProjectDto dto)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
         var created = await _service.CreateAsync(dto);
@@ -39,7 +47,10 @@ public class ProjectsController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, ProjectDto dto)
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ProjectDto))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ProjectDto>> Update(int id, ProjectDto dto)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
         if (id != dto.Id) return BadRequest();
@@ -49,7 +60,9 @@ public class ProjectsController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(int id)
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult> Delete(int id)
     {
         var result = await _service.DeleteAsync(id);
         if (!result) return NotFound();

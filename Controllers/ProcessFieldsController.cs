@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ProcessTracker.API.DTOs;
 using ProcessTracker.API.Services;
@@ -16,14 +19,17 @@ public class ProcessFieldsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAll([FromQuery] int? processDefinitionId)
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<ProcessFieldDto>))]
+    public async Task<ActionResult<IEnumerable<ProcessFieldDto>>> GetAll([FromQuery] int? processDefinitionId)
     {
         var items = await _service.GetAllAsync(processDefinitionId);
         return Ok(items);
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(int id)
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ProcessFieldDto))]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ProcessFieldDto>> GetById(int id)
     {
         var item = await _service.GetByIdAsync(id);
         if (item == null) return NotFound();
@@ -31,7 +37,9 @@ public class ProcessFieldsController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create(ProcessFieldDto dto)
+    [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(ProcessFieldDto))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<ProcessFieldDto>> Create(ProcessFieldDto dto)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
         try
@@ -47,7 +55,10 @@ public class ProcessFieldsController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, ProcessFieldDto dto)
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ProcessFieldDto))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ProcessFieldDto>> Update(int id, ProcessFieldDto dto)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
         if (id != dto.Id) return BadRequest();
@@ -64,7 +75,9 @@ public class ProcessFieldsController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(int id)
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult> Delete(int id)
     {
         var result = await _service.DeleteAsync(id);
         if (!result) return NotFound();

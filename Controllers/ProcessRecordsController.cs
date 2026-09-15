@@ -1,3 +1,5 @@
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ProcessTracker.API.DTOs;
 using ProcessTracker.API.Services;
@@ -16,7 +18,9 @@ public class ProcessRecordsController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(int id)
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ProcessRecordDto))]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ProcessRecordDto>> GetById(int id)
     {
         var record = await _service.GetByIdAsync(id);
         if (record == null) return NotFound();
@@ -24,7 +28,9 @@ public class ProcessRecordsController : ControllerBase
     }
 
     [HttpGet("by-service-item/{serviceItemId}")]
-    public async Task<IActionResult> GetByServiceItem(int serviceItemId)
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ProcessRecordDto))]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ProcessRecordDto>> GetByServiceItem(int serviceItemId)
     {
         var record = await _service.GetByServiceItemIdAsync(serviceItemId);
         if (record == null) return NotFound();
@@ -32,7 +38,10 @@ public class ProcessRecordsController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create(ProcessRecordDto dto)
+    [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(ProcessRecordDto))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<ActionResult<ProcessRecordDto>> Create(ProcessRecordDto dto)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
         var (record, validationResult) = await _service.CreateAsync(dto);
@@ -49,7 +58,10 @@ public class ProcessRecordsController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, ProcessRecordDto dto)
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ProcessRecordDto))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ProcessRecordDto>> Update(int id, ProcessRecordDto dto)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
         if (id != dto.Id) return BadRequest();
@@ -66,7 +78,9 @@ public class ProcessRecordsController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(int id)
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult> Delete(int id)
     {
         var result = await _service.DeleteAsync(id);
         if (!result) return NotFound();

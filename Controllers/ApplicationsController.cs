@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ProcessTracker.API.DTOs;
 using ProcessTracker.API.Services;
@@ -16,14 +19,17 @@ public class ApplicationsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAll([FromQuery] int? projectId)
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<ApplicationDto>))]
+    public async Task<ActionResult<IEnumerable<ApplicationDto>>> GetAll([FromQuery] int? projectId)
     {
         var apps = await _service.GetAllAsync(projectId);
         return Ok(apps);
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(int id)
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApplicationDto))]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ApplicationDto>> GetById(int id)
     {
         var app = await _service.GetByIdAsync(id);
         if (app == null) return NotFound();
@@ -31,7 +37,9 @@ public class ApplicationsController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create(ApplicationDto dto)
+    [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(ApplicationDto))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<ApplicationDto>> Create(ApplicationDto dto)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
         var created = await _service.CreateAsync(dto);
@@ -40,7 +48,10 @@ public class ApplicationsController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, ApplicationDto dto)
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApplicationDto))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ApplicationDto>> Update(int id, ApplicationDto dto)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
         if (id != dto.Id) return BadRequest();
@@ -50,7 +61,10 @@ public class ApplicationsController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(int id)
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<ActionResult> Delete(int id)
     {
         try
         {

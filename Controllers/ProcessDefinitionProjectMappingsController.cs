@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ProcessTracker.API.DTOs;
 using ProcessTracker.API.Services;
@@ -16,21 +19,26 @@ public class ProcessDefinitionProjectMappingsController : ControllerBase
     }
 
     [HttpGet("by-project/{projectId}")]
-    public async Task<IActionResult> GetByProject(int projectId)
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<ProcessDefinitionProjectMappingDto>))]
+    public async Task<ActionResult<IEnumerable<ProcessDefinitionProjectMappingDto>>> GetByProject(int projectId)
     {
         var items = await _service.GetByProjectIdAsync(projectId);
         return Ok(items);
     }
 
     [HttpGet("by-process-definition/{processDefinitionId}")]
-    public async Task<IActionResult> GetByProcessDefinition(int processDefinitionId)
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<ProcessDefinitionProjectMappingDto>))]
+    public async Task<ActionResult<IEnumerable<ProcessDefinitionProjectMappingDto>>> GetByProcessDefinition(int processDefinitionId)
     {
         var items = await _service.GetByProcessDefinitionIdAsync(processDefinitionId);
         return Ok(items);
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create(ProcessDefinitionProjectMappingDto dto)
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ProcessDefinitionProjectMappingDto))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<ActionResult<ProcessDefinitionProjectMappingDto>> Create(ProcessDefinitionProjectMappingDto dto)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
         try
@@ -46,7 +54,9 @@ public class ProcessDefinitionProjectMappingsController : ControllerBase
     }
 
     [HttpDelete("{processDefinitionId}/{projectId}")]
-    public async Task<IActionResult> Delete(int processDefinitionId, int projectId)
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult> Delete(int processDefinitionId, int projectId)
     {
         var result = await _service.DeleteAsync(processDefinitionId, projectId);
         if (!result) return NotFound();

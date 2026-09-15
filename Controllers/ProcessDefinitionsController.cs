@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ProcessTracker.API.DTOs;
 using ProcessTracker.API.Services;
@@ -16,14 +19,17 @@ public class ProcessDefinitionsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAll()
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<ProcessDefinitionDto>))]
+    public async Task<ActionResult<IEnumerable<ProcessDefinitionDto>>> GetAll()
     {
         var items = await _service.GetAllAsync();
         return Ok(items);
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(int id)
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ProcessDefinitionDto))]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ProcessDefinitionDto>> GetById(int id)
     {
         var item = await _service.GetByIdAsync(id);
         if (item == null) return NotFound();
@@ -31,7 +37,10 @@ public class ProcessDefinitionsController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create(ProcessDefinitionDto dto)
+    [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(ProcessDefinitionDto))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<ActionResult<ProcessDefinitionDto>> Create(ProcessDefinitionDto dto)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
         try
@@ -46,7 +55,11 @@ public class ProcessDefinitionsController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, ProcessDefinitionDto dto)
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ProcessDefinitionDto))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<ActionResult<ProcessDefinitionDto>> Update(int id, ProcessDefinitionDto dto)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
         if (id != dto.Id) return BadRequest();
@@ -63,7 +76,10 @@ public class ProcessDefinitionsController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(int id)
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<ActionResult> Delete(int id)
     {
         try
         {
