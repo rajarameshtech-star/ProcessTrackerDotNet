@@ -61,8 +61,11 @@ try
     var app = builder.Build();
 
     // Serilog Request Logging (built-in) or custom middleware
-    // We'll use our custom global logging middleware, but wait, usually you do use Serilog's, so I will add `app.UseMiddleware<GlobalLoggingMiddleware>();`
+    // Serilog Request Logging or custom metrics
     app.UseMiddleware<GlobalLoggingMiddleware>();
+    
+    // Global exception handling mapped seamlessly inside logging bounds
+    app.UseMiddleware<GlobalExceptionMiddleware>();
 
     // Configure the HTTP request pipeline.
     if (app.Environment.IsDevelopment())
