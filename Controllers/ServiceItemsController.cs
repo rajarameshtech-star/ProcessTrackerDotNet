@@ -19,11 +19,19 @@ public class ServiceItemsController : ControllerBase
     }
 
     [HttpGet]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<ServiceItemDto>))]
-    public async Task<ActionResult<IEnumerable<ServiceItemDto>>> GetAll([FromQuery] int? applicationId)
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PagedResult<ServiceItemDto>))]
+    public async Task<ActionResult<PagedResult<ServiceItemDto>>> GetAll(
+        [FromQuery] int? applicationId,
+        [FromQuery] int? processDefinitionId,
+        [FromQuery] string? status,
+        [FromQuery] string? priority,
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 10,
+        [FromQuery] int? projectId = null)
     {
-        var items = await _service.GetAllAsync(applicationId);
-        return Ok(items);
+        var result = await _service.GetAllAsync(
+            applicationId, processDefinitionId, status, priority, pageNumber, pageSize, projectId);
+        return Ok(result);
     }
 
     [HttpGet("{id}")]

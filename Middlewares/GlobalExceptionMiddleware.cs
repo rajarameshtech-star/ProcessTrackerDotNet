@@ -56,7 +56,7 @@ public class GlobalExceptionMiddleware
                 // Fallback for general custom defined domain exception
                 statusCode = (int)HttpStatusCode.BadRequest;
                 message = exception.Message;
-                break;
+                break;  
         }
 
         context.Response.ContentType = "application/json";

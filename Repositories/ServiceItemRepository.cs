@@ -18,6 +18,42 @@ public class ServiceItemRepository : IServiceItemRepository
         return await _context.ServiceItems.AsNoTracking().ToListAsync(cancellationToken);
     }
 
+    public async Task<(IEnumerable<ServiceItem> Items, int TotalCount)> GetPagedAsync(
+        int? applicationId = null,
+        int? processDefinitionId = null,
+        string? status = null,
+        string? priority = null,
+        int pageNumber = 1,
+        int pageSize = 10,
+        int? projectId = null,
+        CancellationToken cancellationToken = default)
+    {
+        var query = _context.ServiceItems.AsNoTracking().AsQueryable();
+
+        if (applicationId.HasValue)
+            query = query.Where(s => s.ApplicationId == applicationId.Value);
+        else if (projectId.HasValue)
+            query = query.Where(s => s.Application != null && s.Application.ProjectId == projectId.Value);
+
+        if (processDefinitionId.HasValue)
+            query = query.Where(s => s.ProcessDefinitionId == processDefinitionId.Value);
+
+        if (!string.IsNullOrWhiteSpace(status))
+            query = query.Where(s => s.Status == status);
+
+        if (!string.IsNullOrWhiteSpace(priority))
+            query = query.Where(s => s.Priority == priority);
+
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        var items = await query
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+
+        return (items, totalCount);
+    }
+
     public async Task<IEnumerable<ServiceItem>> GetByApplicationIdAsync(int applicationId, CancellationToken cancellationToken = default)
     {
         return await _context.ServiceItems

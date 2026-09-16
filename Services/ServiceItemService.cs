@@ -27,13 +27,26 @@ public class ServiceItemService : IServiceItemService
         _recordRepo = recordRepo;
     }
 
-    public async Task<IEnumerable<ServiceItemDto>> GetAllAsync(int? applicationId = null, CancellationToken cancellationToken = default)
+    public async Task<PagedResult<ServiceItemDto>> GetAllAsync(
+        int? applicationId = null,
+        int? processDefinitionId = null,
+        string? status = null,
+        string? priority = null,
+        int pageNumber = 1,
+        int pageSize = 10,
+        int? projectId = null,
+        CancellationToken cancellationToken = default)
     {
-        var items = applicationId.HasValue
-            ? await _serviceItemRepo.GetByApplicationIdAsync(applicationId.Value, cancellationToken)
-            : await _serviceItemRepo.GetAllAsync(cancellationToken);
+        var (items, totalCount) = await _serviceItemRepo.GetPagedAsync(
+            applicationId, processDefinitionId, status, priority, pageNumber, pageSize, projectId, cancellationToken);
         
-        return items.Select(MapToDto);
+        return new PagedResult<ServiceItemDto>
+        {
+            Items = items.Select(MapToDto),
+            TotalCount = totalCount,
+            PageNumber = pageNumber,
+            PageSize = pageSize
+        };
     }
 
     public async Task<ServiceItemDto?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
