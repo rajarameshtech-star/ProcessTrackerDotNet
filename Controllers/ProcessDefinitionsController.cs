@@ -43,15 +43,8 @@ public class ProcessDefinitionsController : ControllerBase
     public async Task<ActionResult<ProcessDefinitionDto>> Create(ProcessDefinitionDto dto)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
-        try
-        {
-            var created = await _service.CreateAsync(dto);
-            return CreatedAtAction(nameof(GetById), new { id = created!.Id }, created);
-        }
-        catch (InvalidOperationException ex)
-        {
-            return Conflict(new { message = ex.Message });
-        }
+        var created = await _service.CreateAsync(dto);
+        return CreatedAtAction(nameof(GetById), new { id = created!.Id }, created);
     }
 
     [HttpPut("{id}")]
@@ -63,16 +56,9 @@ public class ProcessDefinitionsController : ControllerBase
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
         if (id != dto.Id) return BadRequest();
-        try
-        {
-            var updated = await _service.UpdateAsync(id, dto);
-            if (updated == null) return NotFound();
-            return Ok(updated);
-        }
-        catch (InvalidOperationException ex)
-        {
-            return Conflict(new { message = ex.Message });
-        }
+        var updated = await _service.UpdateAsync(id, dto);
+        if (updated == null) return NotFound();
+        return Ok(updated);
     }
 
     [HttpDelete("{id}")]
@@ -81,15 +67,8 @@ public class ProcessDefinitionsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<ActionResult> Delete(int id)
     {
-        try
-        {
-            var result = await _service.DeleteAsync(id);
-            if (!result) return NotFound();
-            return Ok();
-        }
-        catch (InvalidOperationException ex)
-        {
-            return Conflict(new { message = ex.Message });
-        }
+        var result = await _service.DeleteAsync(id);
+        if (!result) return NotFound();
+        return Ok();
     }
 }

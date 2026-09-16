@@ -1,6 +1,7 @@
 using ProcessTracker.API.DTOs;
 using ProcessTracker.API.Entities;
 using ProcessTracker.API.Repositories;
+using ProcessTracker.API.Exceptions;
 
 namespace ProcessTracker.API.Services;
 
@@ -72,7 +73,7 @@ public class ServiceItemService : IServiceItemService
         {
             var record = await _recordRepo.GetByServiceItemIdAsync(id, cancellationToken);
             if (record != null)
-                throw new InvalidOperationException("Cannot change ProcessDefinitionId when a ProcessRecord already exists for this ServiceItem.");
+                throw new ProcessTrackerConflictException("Cannot change ProcessDefinitionId when a ProcessRecord already exists for this ServiceItem.");
         }
 
         entity.ApplicationId = dto.ApplicationId;
@@ -100,14 +101,14 @@ public class ServiceItemService : IServiceItemService
     private async Task ValidateCompatibilityAsync(int applicationId, int processDefinitionId, CancellationToken cancellationToken)
     {
         var app = await _applicationRepo.GetByIdAsync(applicationId, false, cancellationToken);
-        if (app == null) throw new ArgumentException($"Application {applicationId} not found.");
+        if (app == null) throw new ProcessTrackerValidationException($"Application {applicationId} not found.");
 
         var processDef = await _processDefRepo.GetByIdAsync(processDefinitionId, false, cancellationToken);
-        if (processDef == null) throw new ArgumentException($"ProcessDefinition {processDefinitionId} not found.");
+        if (processDef == null) throw new ProcessTrackerValidationException($"ProcessDefinition {processDefinitionId} not found.");
 
         var isMapped = await _mappingRepo.ExistsAsync(processDefinitionId, app.ProjectId, cancellationToken);
         if (!isMapped)
-            throw new InvalidOperationException("ProcessDefinition is not mapped to the Application's Project.");
+            throw new ProcessTrackerConflictException("ProcessDefinition is not mapped to the Application's Project.");
     }
 
     private static ServiceItemDto MapToDto(ServiceItem e) => new ServiceItemDto

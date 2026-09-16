@@ -2,6 +2,7 @@ using System.Text.Json;
 using ProcessTracker.API.DTOs;
 using ProcessTracker.API.Entities;
 using ProcessTracker.API.Repositories;
+using ProcessTracker.API.Exceptions;
 
 namespace ProcessTracker.API.Services;
 
@@ -97,21 +98,21 @@ public class ProcessFieldService : IProcessFieldService
     private static void ValidateMetadata(ProcessFieldDto dto)
     {
         if (dto.MinLength.HasValue && dto.MaxLength.HasValue && dto.MinLength > dto.MaxLength)
-            throw new InvalidOperationException("MinLength cannot be greater than MaxLength.");
+            throw new ProcessTrackerValidationException("MinLength cannot be greater than MaxLength.");
         
         if (dto.FieldType == FieldType.Select)
         {
             if (string.IsNullOrWhiteSpace(dto.OptionsJson))
-                throw new InvalidOperationException("OptionsJson is required for Select FieldType.");
+                throw new ProcessTrackerValidationException("OptionsJson is required for Select FieldType.");
             try
             {
                 var options = JsonSerializer.Deserialize<List<string>>(dto.OptionsJson);
                 if (options == null || options.Count == 0)
-                    throw new InvalidOperationException("OptionsJson must contain at least one option.");
+                    throw new ProcessTrackerValidationException("OptionsJson must contain at least one option.");
             }
             catch
             {
-                throw new InvalidOperationException("OptionsJson must be a valid JSON array of strings.");
+                throw new ProcessTrackerValidationException("OptionsJson must be a valid JSON array of strings.");
             }
         }
     }

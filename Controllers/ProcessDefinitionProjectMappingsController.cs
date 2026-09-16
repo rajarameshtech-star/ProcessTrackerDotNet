@@ -41,16 +41,9 @@ public class ProcessDefinitionProjectMappingsController : ControllerBase
     public async Task<ActionResult<ProcessDefinitionProjectMappingDto>> Create(ProcessDefinitionProjectMappingDto dto)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
-        try
-        {
-            var created = await _service.CreateAsync(dto);
-            if (created == null) return BadRequest("Project or ProcessDefinition not found.");
-            return Ok(created); // Typically 201 with location, but no single Get exists for composite
-        }
-        catch (InvalidOperationException ex)
-        {
-            return Conflict(new { message = ex.Message });
-        }
+        var created = await _service.CreateAsync(dto);
+        if (created == null) return BadRequest("Project or ProcessDefinition not found.");
+        return Ok(created); // Typically 201 with location, but no single Get exists for composite
     }
 
     [HttpDelete("{processDefinitionId}/{projectId}")]

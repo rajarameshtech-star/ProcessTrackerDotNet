@@ -43,19 +43,8 @@ public class ServiceItemsController : ControllerBase
     public async Task<ActionResult<ServiceItemDto>> Create(ServiceItemDto dto)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
-        try
-        {
-            var created = await _service.CreateAsync(dto);
-            return CreatedAtAction(nameof(GetById), new { id = created!.Id }, created);
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
-        catch (InvalidOperationException ex)
-        {
-            return Conflict(new { message = ex.Message });
-        }
+        var created = await _service.CreateAsync(dto);
+        return CreatedAtAction(nameof(GetById), new { id = created!.Id }, created);
     }
 
     [HttpPut("{id}")]
@@ -67,20 +56,9 @@ public class ServiceItemsController : ControllerBase
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
         if (id != dto.Id) return BadRequest();
-        try
-        {
-            var updated = await _service.UpdateAsync(id, dto);
-            if (updated == null) return NotFound();
-            return Ok(updated);
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
-        catch (InvalidOperationException ex)
-        {
-            return Conflict(new { message = ex.Message });
-        }
+        var updated = await _service.UpdateAsync(id, dto);
+        if (updated == null) return NotFound();
+        return Ok(updated);
     }
 
     [HttpDelete("{id}")]

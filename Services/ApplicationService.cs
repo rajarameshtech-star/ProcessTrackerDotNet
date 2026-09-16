@@ -1,6 +1,7 @@
 using ProcessTracker.API.DTOs;
 using ProcessTracker.API.Entities;
 using ProcessTracker.API.Repositories;
+using ProcessTracker.API.Exceptions;
 
 namespace ProcessTracker.API.Services;
 
@@ -68,7 +69,7 @@ public class ApplicationService : IApplicationService
         if (app == null) return false;
 
         if (app.ServiceItems.Any()) 
-            throw new InvalidOperationException("Cannot delete application because it contains ServiceItems.");
+            throw new ProcessTrackerConflictException("Cannot delete application because it contains ServiceItems.");
 
         await _applicationRepository.DeleteAsync(app, cancellationToken);
         return true;

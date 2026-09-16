@@ -1,6 +1,7 @@
 using ProcessTracker.API.DTOs;
 using ProcessTracker.API.Entities;
 using ProcessTracker.API.Repositories;
+using ProcessTracker.API.Exceptions;
 
 namespace ProcessTracker.API.Services;
 
@@ -40,7 +41,7 @@ public class ProcessDefinitionProjectMappingService : IProcessDefinitionProjectM
             return null;
 
         if (await _mappingRepo.ExistsAsync(dto.ProcessDefinitionId, dto.ProjectId, cancellationToken))
-            throw new InvalidOperationException("Mapping already exists.");
+            throw new ProcessTrackerConflictException("Mapping already exists.");
 
         var entity = new ProcessDefinitionProjectMapping
         {

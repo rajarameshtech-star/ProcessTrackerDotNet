@@ -36,11 +36,13 @@ public class GlobalExceptionMiddleware
         // Map known domain / user-defined exception types to graceful HTTP codes
         switch (exception)
         {
+            case ProcessTracker.API.Exceptions.ProcessTrackerValidationException _:
             case ArgumentNullException _:
             case ArgumentException _:
                 statusCode = (int)HttpStatusCode.BadRequest;
                 message = exception.Message;
                 break;
+            case ProcessTracker.API.Exceptions.ProcessTrackerConflictException _:
             case InvalidOperationException _:
                 // We've actively been using InvalidOperationException for business logic conflicts and validation traps
                 statusCode = (int)HttpStatusCode.Conflict; 
@@ -48,6 +50,11 @@ public class GlobalExceptionMiddleware
                 break;
             case KeyNotFoundException _:
                 statusCode = (int)HttpStatusCode.NotFound;
+                message = exception.Message;
+                break;
+            case ProcessTracker.API.Exceptions.ProcessTrackerException _:
+                // Fallback for general custom defined domain exception
+                statusCode = (int)HttpStatusCode.BadRequest;
                 message = exception.Message;
                 break;
         }

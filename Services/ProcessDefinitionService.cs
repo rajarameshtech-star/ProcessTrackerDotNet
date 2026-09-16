@@ -1,6 +1,7 @@
 using ProcessTracker.API.DTOs;
 using ProcessTracker.API.Entities;
 using ProcessTracker.API.Repositories;
+using ProcessTracker.API.Exceptions;
 
 namespace ProcessTracker.API.Services;
 
@@ -28,7 +29,7 @@ public class ProcessDefinitionService : IProcessDefinitionService
     public async Task<ProcessDefinitionDto?> CreateAsync(ProcessDefinitionDto dto, CancellationToken cancellationToken = default)
     {
         var existing = await _processDefRepo.GetByCodeAsync(dto.ProcessCode, false, cancellationToken);
-        if (existing != null) throw new InvalidOperationException($"ProcessCode '{dto.ProcessCode}' already exists.");
+        if (existing != null) throw new ProcessTrackerConflictException($"ProcessCode '{dto.ProcessCode}' already exists.");
 
         var entity = new ProcessDefinition
         {
@@ -51,7 +52,7 @@ public class ProcessDefinitionService : IProcessDefinitionService
         if (entity.ProcessCode != dto.ProcessCode)
         {
             var existing = await _processDefRepo.GetByCodeAsync(dto.ProcessCode, false, cancellationToken);
-            if (existing != null) throw new InvalidOperationException($"ProcessCode '{dto.ProcessCode}' already exists.");
+            if (existing != null) throw new ProcessTrackerConflictException($"ProcessCode '{dto.ProcessCode}' already exists.");
         }
 
         entity.ProcessCode = dto.ProcessCode;
@@ -70,7 +71,7 @@ public class ProcessDefinitionService : IProcessDefinitionService
 
         if (entity.ProcessFields.Any() || entity.ServiceItems.Any() || entity.ProcessRecords.Any() || entity.ProcessDefinitionProjectMappings.Any())
         {
-            throw new InvalidOperationException("Cannot delete ProcessDefinition because it has dependent records.");
+            throw new ProcessTrackerConflictException("Cannot delete ProcessDefinition because it has dependent records.");
         }
 
         await _processDefRepo.DeleteAsync(entity, cancellationToken);

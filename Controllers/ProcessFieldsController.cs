@@ -42,16 +42,9 @@ public class ProcessFieldsController : ControllerBase
     public async Task<ActionResult<ProcessFieldDto>> Create(ProcessFieldDto dto)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
-        try
-        {
-            var created = await _service.CreateAsync(dto);
-            if (created == null) return BadRequest(new { message = "Associated ProcessDefinition not found." });
-            return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
+        var created = await _service.CreateAsync(dto);
+        if (created == null) return BadRequest(new { message = "Associated ProcessDefinition not found." });
+        return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
     }
 
     [HttpPut("{id}")]
@@ -62,16 +55,9 @@ public class ProcessFieldsController : ControllerBase
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
         if (id != dto.Id) return BadRequest();
-        try
-        {
-            var updated = await _service.UpdateAsync(id, dto);
-            if (updated == null) return NotFound();
-            return Ok(updated);
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
+        var updated = await _service.UpdateAsync(id, dto);
+        if (updated == null) return NotFound();
+        return Ok(updated);
     }
 
     [HttpDelete("{id}")]

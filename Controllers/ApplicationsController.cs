@@ -66,15 +66,8 @@ public class ApplicationsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<ActionResult> Delete(int id)
     {
-        try
-        {
-            var result = await _service.DeleteAsync(id);
-            if (!result) return NotFound();
-            return Ok();
-        }
-        catch (InvalidOperationException ex)
-        {
-            return Conflict(new { message = ex.Message });
-        }
+        var result = await _service.DeleteAsync(id);
+        if (!result) return NotFound();
+        return Ok();
     }
 }
